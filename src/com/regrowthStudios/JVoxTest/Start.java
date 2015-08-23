@@ -33,6 +33,7 @@ public class Start {
             GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
         }
 
         SpriteBatch batch = new SpriteBatch();
@@ -95,7 +96,7 @@ public class Start {
             testContainer.update(MouseEvents.getMove(), mp);
 
             testEmitter.render(batch);
-            testEmitter.update();
+            testEmitter.update(mp);
 
             batch.end();
             batch.render(camera);
