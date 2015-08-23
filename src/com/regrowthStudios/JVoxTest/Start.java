@@ -10,6 +10,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
 import com.regrowthStudios.JVox.audio.SoundManager;
+import com.regrowthStudios.JVox.graphics.Camera;
 import com.regrowthStudios.JVox.graphics.SpriteBatch;
 import com.regrowthStudios.JVox.graphics.Window;
 import com.regrowthStudios.JVox.math.Vector;
@@ -20,6 +21,7 @@ import com.regrowthStudios.JVox.utils.EventUtils.MouseEvents;
 
 public class Start {
     private static SoundManager soundManager = null;
+    private static Camera camera = new Camera();
 
     public static void main(String[] args) {
         Window window = new Window();
@@ -31,10 +33,6 @@ public class Start {
             GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glMatrixMode(GL11.GL_PROJECTION);
-            GL11.glLoadIdentity();
-            GL11.glOrtho(0, window.getDimensions().x, window.getDimensions().y, 0, 1, -1);
-            GL11.glMatrixMode(GL11.GL_MODELVIEW);
         }
 
         SpriteBatch batch = new SpriteBatch();
@@ -78,23 +76,30 @@ public class Start {
         ParticleEmitter testEmitter = new ParticleEmitter();
         testEmitter.init();
         
+        camera.init((int)window.getDimensions().x, (int)window.getDimensions().y);
+        
         byte color[] = {(byte)255,(byte) 255, (byte)255, (byte)255};
 
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-            GL11.glMatrixMode(GL11.GL_MODELVIEW);
-            GL11.glLoadIdentity();
+            
+            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+            camera.update();
             batch.begin();
             
-            batch.draw(tex.getTextureID(), 0.0f, 0.0f, 2.0f, 2.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, color);
+            batch.draw(tex.getTextureID(), 0.0f, 0.0f, (float)window.getDimensions().x, (float)window.getDimensions().y, 0.0f, 0.0f, tex.getWidth(), tex.getHeight(), 0.0f, color);
 
-            batch.end();
-            batch.render();
             testContainer.draw(batch);
-            testContainer.update(MouseEvents.getMove(), MouseEvents.getPositionInvY());
+            Vector mp = MouseEvents.getPosition();
+            mp = camera.convertScreenToWorld((float)mp.x, (float)mp.y);
+            testContainer.update(MouseEvents.getMove(), mp);
 
             testEmitter.render(batch);
             testEmitter.update();
 
+            batch.end();
+            batch.render(camera);
+            
             Display.update();
         }
 
