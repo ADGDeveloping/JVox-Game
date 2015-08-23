@@ -12,8 +12,8 @@ import org.newdawn.slick.util.ResourceLoader;
 import com.regrowthStudios.JVox.audio.SoundManager;
 import com.regrowthStudios.JVox.graphics.SpriteBatch;
 import com.regrowthStudios.JVox.graphics.Window;
-import com.regrowthStudios.JVox.math.vector.IVector2;
-import com.regrowthStudios.JVox.math.vector.Vector4;
+import com.regrowthStudios.JVox.math.Vector;
+import com.regrowthStudios.JVox.math.Vector4;
 import com.regrowthStudios.JVox.systems.particle.ParticleEmitter;
 import com.regrowthStudios.JVox.ui.Button;
 import com.regrowthStudios.JVox.utils.EventUtils.MouseEvents;
@@ -23,7 +23,7 @@ public class Start {
 
     public static void main(String[] args) {
         Window window = new Window();
-        window.init("Test", new IVector2(800, 600));
+        window.init("Test", new Vector(800, 600));
         window.create();
 
         {
