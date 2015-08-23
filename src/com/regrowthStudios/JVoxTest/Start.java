@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -37,11 +38,13 @@ public class Start {
         }
 
         SpriteBatch batch = new SpriteBatch();
-
+        batch.init();
+        Texture tex;
         try {
-            batch.texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("data/textures/test.png"));
+            tex = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("data/textures/test.png"));
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
 
         Button testContainer = new Button();
@@ -55,8 +58,6 @@ public class Start {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        batch.init(new Vector4(0, 0, Display.getWidth(), Display.getHeight()));
 
         /*{
             soundManager = new SoundManager();
@@ -76,16 +77,22 @@ public class Start {
 
         ParticleEmitter testEmitter = new ParticleEmitter();
         testEmitter.init();
+        
+        byte color[] = {(byte)255,(byte) 255, (byte)255, (byte)255};
 
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
             GL11.glLoadIdentity();
-            batch.render();
+            batch.begin();
+            
+            batch.draw(tex.getTextureID(), 0.0f, 0.0f, 2.0f, 2.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, color);
 
-            testContainer.draw();
+            batch.end();
+            batch.render();
+            testContainer.draw(batch);
             testContainer.update(MouseEvents.getMove(), MouseEvents.getPositionInvY());
 
-            testEmitter.render();
+            testEmitter.render(batch);
             testEmitter.update();
 
             Display.update();
