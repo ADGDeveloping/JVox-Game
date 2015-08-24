@@ -1,29 +1,28 @@
 package com.regrowthStudios.JVoxTest;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
 
 import com.regrowthStudios.JVox.audio.SoundManager;
+import com.regrowthStudios.JVox.entity.Entity;
 import com.regrowthStudios.JVox.graphics.Camera;
 import com.regrowthStudios.JVox.graphics.SpriteBatch;
 import com.regrowthStudios.JVox.graphics.Window;
 import com.regrowthStudios.JVox.math.Vector;
 import com.regrowthStudios.JVox.math.Vector4;
+import com.regrowthStudios.JVox.systems.content.ResourceSystem;
 import com.regrowthStudios.JVox.systems.particle.ParticleEmitter;
-import com.regrowthStudios.JVox.ui.Button;
+import com.regrowthStudios.JVox.ui.CheckBox;
 import com.regrowthStudios.JVox.utils.EventUtils.MouseEvents;
 
 public class Start {
-    private static SoundManager soundManager = null;
+    public static SoundManager soundManager = null;
     private static Camera camera = new Camera();
-    
     private static ArrayList<ParticleEmitter> particleEmitters = new ArrayList<ParticleEmitter>();
 
     public static void main(String[] args) {
@@ -39,75 +38,48 @@ public class Start {
             GL11.glDisable(GL11.GL_DEPTH_TEST);
         }
 
+        {
+            ResourceSystem.loadResource("textures.background.space", "data/textures/test.png", 0);
+            ResourceSystem.loadResource("textures.button.up", "data/textures/up.png", 0);
+            ResourceSystem.loadResource("textures.button.down", "data/textures/down.png", 0);
+            ResourceSystem.loadResource("textures.particle.spark", "data/textures/spark.png", 0);
+            
+            ResourceSystem.loadResource("shaders.basic.texture", "./data/shaders/BasicTexture.vert, ./data/shaders/BasicTexture.frag", 1);
+        }
+
         SpriteBatch batch = new SpriteBatch();
         batch.init();
-        Texture tex;
-        try {
-            tex = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("data/textures/test.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
 
-        Button testContainer = new Button();
-        testContainer.init(new Vector4(0, 0, 200, 40));
+        CheckBox testContainer = new CheckBox();
+        testContainer.init(new Vector4(0, 0, 40, 40));
 
-        try {
-            testContainer.upTexture = TextureLoader.getTexture("PNG",
-                    ResourceLoader.getResourceAsStream("data/textures/up.png"));
-            testContainer.downTexture = TextureLoader.getTexture("PNG",
-                    ResourceLoader.getResourceAsStream("data/textures/down.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Entity testEntity = new Entity(0, new Vector4(100, 100, 50, 50));
 
-        /*{
-            soundManager = new SoundManager();
-            soundManager.init();
+        camera.init((int) window.getDimensions().x, (int) window.getDimensions().y);
 
-            Sound3D testSound = new Sound3D();
-            testSound.setSoundSystem(soundManager.getSoundSystem());
-            testSound.init(SoundFlags.NONE, "testsound", "data/audio/test.ogg", "test.ogg", new Vector(0, 0, 0));
-            testSound.create();
-
-            SoundPool testPool = new SoundPool();
-            testPool.addSound("testsound", testSound);
-
-            soundManager.addSoundPool("testpool", testPool);
-            soundManager.play("testpool", "testsound");
-        }*/
-        Texture particleTexture = null;
-        try {
-            particleTexture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("data/textures/spark.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        camera.init((int)window.getDimensions().x, (int)window.getDimensions().y);
-        
-        byte color[] = {(byte)255,(byte) 255, (byte)255, (byte)255};
+        byte color[] = { (byte) 255, (byte) 255, (byte) 255, (byte) 255 };
+        Texture tex = (Texture) ResourceSystem.getResource("textures.background.space");
 
         while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-            
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
             camera.update();
-            batch.begin();
-            
-            batch.draw(tex.getTextureID(), 0.0f, 0.0f, (float)window.getDimensions().x, (float)window.getDimensions().y, 0.0f, 0.0f, tex.getWidth(), tex.getHeight(), 0.0f, color);
 
-            testContainer.draw(batch);
             Vector mp = MouseEvents.getPosition();
-            mp = camera.convertScreenToWorld((float)mp.x, (float)mp.y);
-            testContainer.update(MouseEvents.getMove(), mp);
-            
+            mp = camera.convertScreenToWorld((float) mp.x, (float) mp.y);
+
+            batch.begin();
+            batch.draw(tex.getTextureID(), 0.0f, 0.0f, (float) window.getDimensions().x, (float) window.getDimensions().y,
+                    0.0f, 0.0f, tex.getWidth(), tex.getHeight(), 0.0f, color);
+
             if (MouseEvents.buttonDown(0)) {
                 ParticleEmitter emitter = new ParticleEmitter();
-                emitter.init(particleTexture, (float)mp.x, (float)mp.y, 0.0f, 1.0f);
-                emitter.spawnAngle = (float)Math.PI / 16.0f;
+                emitter.init((Texture) ResourceSystem.getResource("textures.particle.spark"), (float) mp.x, (float) mp.y, 0.0f,
+                        1.0f);
+                emitter.spawnAngle = (float) Math.PI / 32.0f;
                 emitter.particlesPerSpawn = 1;
                 emitter.framesUntilSpawn = 1;
-                emitter.setColor((byte)255, (byte)0, (byte)255, (byte)255);
+                emitter.setColor((byte) new Random().nextInt(255), (byte) new Random().nextInt(255), (byte) new Random().nextInt(255), (byte) 255);
                 particleEmitters.add(emitter);
             }
 
@@ -116,14 +88,16 @@ public class Start {
                 e.update();
             }
 
+            testContainer.draw(batch);
+            testContainer.update(MouseEvents.getMove(), mp);
+
+            testEntity.render(batch);
+            testEntity.update();
+
             batch.end();
             batch.render(camera);
-            
+
             Display.update();
         }
-
-        //soundManager.stop("testpool", "testsound");
-        //soundManager.destroy("testpool", "testsound");
-        //soundManager.getSoundSystem().cleanup();
     }
 }
