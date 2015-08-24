@@ -124,16 +124,19 @@ public class Start {
                 player.aabb.x = camera.getPosition().x;
                 player.aabb.y = camera.getPosition().y;
                 
-                e1.render(batch);
-                e1.update();
 
-                player.render(batch);
+                e1.update();
                 player.update();
-                
                 ArrayList<Entity> e = new ArrayList<Entity>();
                 e.add(player);
                 e.add(e1);
+                
                 cManager.collide(e);
+                
+                e1.render(batch);
+
+                player.render(batch);
+             
             }
 
             batch.end();
