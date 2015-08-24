@@ -1,6 +1,7 @@
 package com.regrowthStudios.JVoxTest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -22,6 +23,8 @@ import com.regrowthStudios.JVox.utils.EventUtils.MouseEvents;
 public class Start {
     private static SoundManager soundManager = null;
     private static Camera camera = new Camera();
+    
+    private static ArrayList<ParticleEmitter> particleEmitters = new ArrayList<ParticleEmitter>();
 
     public static void main(String[] args) {
         Window window = new Window();
@@ -73,9 +76,12 @@ public class Start {
             soundManager.addSoundPool("testpool", testPool);
             soundManager.play("testpool", "testsound");
         }*/
-
-        ParticleEmitter testEmitter = new ParticleEmitter();
-        testEmitter.init();
+        Texture particleTexture = null;
+        try {
+            particleTexture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream("data/textures/spark.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         camera.init((int)window.getDimensions().x, (int)window.getDimensions().y);
         
@@ -94,9 +100,21 @@ public class Start {
             Vector mp = MouseEvents.getPosition();
             mp = camera.convertScreenToWorld((float)mp.x, (float)mp.y);
             testContainer.update(MouseEvents.getMove(), mp);
+            
+            if (MouseEvents.buttonDown(0)) {
+                ParticleEmitter emitter = new ParticleEmitter();
+                emitter.init(particleTexture, (float)mp.x, (float)mp.y, 0.0f, 1.0f);
+                emitter.spawnAngle = (float)Math.PI / 16.0f;
+                emitter.particlesPerSpawn = 1;
+                emitter.framesUntilSpawn = 1;
+                emitter.setColor((byte)255, (byte)0, (byte)255, (byte)255);
+                particleEmitters.add(emitter);
+            }
 
-            testEmitter.render(batch);
-            testEmitter.update(mp);
+            for (ParticleEmitter e : particleEmitters) {
+                e.render(batch);
+                e.update();
+            }
 
             batch.end();
             batch.render(camera);
